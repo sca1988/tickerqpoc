@@ -1,7 +1,20 @@
+using Microsoft.AspNetCore.HttpOverrides;
+using TickerQ.DependencyInjection;
+using TickerQ.Utilities.Interfaces;
+using WebApplication1;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
+
+builder.Services.AddTickerQ();
+
+//Add Scheduled Jobs
+builder.Services.AddTransient<ITickerFunction, ScheduledService>();
+//services.MapTicker<JobExecutionScheduler>().WithCron("*/1 * * * *");
+builder.Services.MapTicker<ScheduledService>().WithCron("*/1 * * * * *");
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -10,6 +23,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwaggerUI(options => { options.SwaggerEndpoint("/openapi/v1.json", "OpenAPI V1"); });
 }
 
 app.UseHttpsRedirection();
@@ -33,9 +47,17 @@ app.MapGet("/weatherforecast", () =>
     })
     .WithName("GetWeatherForecast");
 
+//app.UseTickerQ();
+app.UseForwardedHeaders(
+    new ForwardedHeadersOptions
+    {
+        ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+    });
+app.UseHttpsRedirection();
+
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
