@@ -12,9 +12,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddTickerQ();
 
 //Add Scheduled Jobs
-builder.Services.AddTransient<ITickerFunction, ScheduledService>();
-//services.MapTicker<JobExecutionScheduler>().WithCron("*/1 * * * *");
-builder.Services.MapTicker<ScheduledService>().WithCron("*/1 * * * * *");
+// builder.Services.AddTransient<ITickerFunction, ScheduledService>();
+// builder.Services.MapTicker<ScheduledService>().WithCron("*/1 * * * * *");
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
